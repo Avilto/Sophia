@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Web Speech API initialization
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
+    
     if (SpeechRecognition) {
         recognition = new SpeechRecognition();
         recognition.lang = 'es-ES';
@@ -48,11 +49,23 @@ document.addEventListener('DOMContentLoaded', () => {
             voiceBtn.classList.add('listening');
             voiceBtn.textContent = 'ESCUCHANDO...';
             voiceStatusText.textContent = 'Sophia está escuchando tu voz...';
+            voiceStatusText.style.color = 'var(--color-cyan)';
         };
 
         recognition.onerror = (e) => {
             console.error('Speech recognition error', e);
-            voiceStatusText.textContent = 'Error en reconocimiento de voz.';
+            let errMsg = 'Error en reconocimiento de voz.';
+            if (e.error === 'not-allowed') {
+                errMsg = 'Acceso denegado al micrófono. Permítelo en el navegador.';
+            } else if (e.error === 'no-speech') {
+                errMsg = 'No se detectó voz. Vuelve a hacer clic e intenta de nuevo.';
+            } else if (e.error === 'network') {
+                errMsg = 'Error de red. El reconocimiento requiere conexión a internet.';
+            } else {
+                errMsg = `Error de audio: ${e.error}`;
+            }
+            voiceStatusText.textContent = errMsg;
+            voiceStatusText.style.color = 'var(--color-magenta)';
             resetVoiceState();
         };
 
@@ -65,10 +78,17 @@ document.addEventListener('DOMContentLoaded', () => {
             addMessage(transcript, 'user');
             processCommand(transcript);
         };
+
+        // Warn if not running on localhost/HTTP server (Web Speech API restriction)
+        if (window.location.protocol === 'file:') {
+            voiceStatusText.textContent = 'AVISO: Usa http://localhost:8080 (La voz no funciona en file://)';
+            voiceStatusText.style.color = 'var(--color-amber)';
+        }
     } else {
         voiceBtn.textContent = 'Voz no soportada';
         voiceBtn.disabled = true;
         voiceStatusText.textContent = 'Reconocimiento de voz no soportado en este navegador.';
+        voiceStatusText.style.color = 'var(--color-magenta)';
     }
 
     // Reset Voice State helper
@@ -76,7 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isListening = false;
         voiceBtn.classList.remove('listening');
         voiceBtn.textContent = 'HABLAR CON SOPHIA';
-        voiceStatusText.textContent = 'Sophia está lista.';
+        if (voiceStatusText.textContent === 'Sophia está escuchando tu voz...' || voiceStatusText.textContent === 'Sophia está lista.') {
+            voiceStatusText.textContent = 'Sophia está lista.';
+            voiceStatusText.style.color = 'var(--color-amber)';
+        }
     }
 
     // Speech Synthesis

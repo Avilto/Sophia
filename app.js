@@ -154,6 +154,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Chat History Array
+    const chatHistory = [];
+
     // Chat Message System
     function addMessage(text, sender) {
         const bubble = document.createElement('div');
@@ -170,28 +173,19 @@ document.addEventListener('DOMContentLoaded', () => {
         conversationHistory.appendChild(bubble);
         conversationHistory.scrollTop = conversationHistory.scrollHeight;
 
+        // Save to local chat history
+        chatHistory.push({ sender, text });
+
         if (sender === 'sophia') {
             speak(text);
         }
     }
 
-    // Command Processor
-    function processCommand(command) {
+    // Command Processor (Connects to backend /api/chat)
+    async function processCommand(command) {
         const cmd = command.toLowerCase().trim();
         
-        // 1. Greet commands
-        if (cmd.includes('hola') || cmd.includes('buenos días') || cmd.includes('buenas tardes')) {
-            addMessage('Hola, señor. Espero que esté teniendo un excelente día. ¿En qué le puedo asistir hoy?', 'sophia');
-            return;
-        }
-
-        // 2. Who are you
-        if (cmd.includes('quién eres') || cmd.includes('tu nombre') || cmd.includes('quien eres')) {
-            addMessage('Soy Sophia, su asistente de inteligencia artificial personal. Diseñada para coordinar sus sistemas tecnológicos, analizar datos visuales y proporcionarle soporte de realidad aumentada.', 'sophia');
-            return;
-        }
-
-        // 3. IoT Lights command
+        // 1. IoT Lights command (Local Interception)
         if (cmd.includes('luces') || cmd.includes('luz')) {
             if (cmd.includes('enciende') || cmd.includes('encender') || cmd.includes('activar') || cmd.includes('activa')) {
                 if (!switchLights.checked) {
@@ -215,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 4. Secure shield command
+        // 2. Secure shield command (Local Interception)
         if (cmd.includes('escudo') || cmd.includes('seguridad') || cmd.includes('firewall')) {
             if (cmd.includes('activa') || cmd.includes('enciende') || cmd.includes('conectar')) {
                 switchShield.checked = true;
@@ -229,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 5. Vision activation
+        // 3. Vision activation (Local Interception)
         if (cmd.includes('visión') || cmd.includes('vision') || cmd.includes('cámara') || cmd.includes('camara') || cmd.includes('ver')) {
             if (cmd.includes('activa') || cmd.includes('enciende') || cmd.includes('iniciar') || cmd.includes('abre')) {
                 if (!cameraActive) {
@@ -251,15 +245,62 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 6. System status
+        // 4. System status (Local Interception)
         if (cmd.includes('estado del sistema') || cmd.includes('estado') || cmd.includes('diagnóstico') || cmd.includes('diagnostico')) {
             const activeIoTCount = [switchLights.checked, switchDoor.checked, switchAcs.checked, switchShield.checked].filter(Boolean).length;
             addMessage(`Estado del sistema: Frecuencia de CPU a ${cpuVal.textContent}, uso de memoria RAM a ${ramVal.textContent}, y temperatura del núcleo a ${tempVal.textContent}. Tenemos ${activeIoTCount} de 4 dispositivos IoT en línea y activos. Conexión de red estable.`, 'sophia');
             return;
         }
 
-        // 7. General help or unhandled input
-        addMessage('He recibido la instrucción: "' + command + '". Mis bases de datos sugieren que este comando requiere servicios externos aún no conectados, pero he registrado la consulta en mi bitácora.', 'sophia');
+        // 5. Send other queries to LLM (Ollama / Llama)
+        // Show thinking state bubble
+        const tempBubble = document.createElement('div');
+        tempBubble.className = 'message-bubble sophia';
+        tempBubble.innerHTML = '<span class="bubble-sender">Sophia</span><span style="font-style: italic; opacity: 0.7;">Conectando con núcleo cognitivo...</span>';
+        conversationHistory.appendChild(tempBubble);
+        conversationHistory.scrollTop = conversationHistory.scrollHeight;
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: command,
+                    history: chatHistory.slice(-6) // Send recent history
+                })
+            });
+
+            if (conversationHistory.contains(tempBubble)) {
+                conversationHistory.removeChild(tempBubble);
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al comunicarse con el núcleo.');
+            }
+
+            const data = await response.json();
+
+            // Display internet search status indicator if performed
+            if (data.searchPerformed) {
+                const searchIndicator = document.createElement('div');
+                searchIndicator.className = 'message-bubble sophia';
+                searchIndicator.style.background = 'rgba(255, 170, 0, 0.05)';
+                searchIndicator.style.borderLeft = '3px solid var(--color-amber)';
+                searchIndicator.innerHTML = `<span class="bubble-sender" style="color: var(--color-amber)">Buscador</span><span style="font-style: italic;">Consulta web realizada: "${data.searchQuery}"</span>`;
+                conversationHistory.appendChild(searchIndicator);
+                conversationHistory.scrollTop = conversationHistory.scrollHeight;
+            }
+
+            addMessage(data.reply, 'sophia');
+
+        } catch (error) {
+            if (conversationHistory.contains(tempBubble)) {
+                conversationHistory.removeChild(tempBubble);
+            }
+            console.error('Sophia Connection Error:', error);
+            addMessage(`Error: No he podido enlazar con el núcleo. Asegúrate de ejecutar el servidor con "npm start" y que Ollama tenga activo el modelo "llama3.2".`, 'sophia');
+        }
     }
 
     // Send text message on button click or Enter key

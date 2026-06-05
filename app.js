@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleVisionBtn = document.getElementById('toggle-vision');
     const themeSelector = document.getElementById('theme-selector');
 
+    // Check if running on file:// protocol
+    if (window.location.protocol === 'file:') {
+        const fileBanner = document.getElementById('file-protocol-banner');
+        if (fileBanner) fileBanner.style.display = 'block';
+    }
+
     // IoT Switches
     const switchLights = document.getElementById('switch-lights');
     const switchDoor = document.getElementById('switch-door');
@@ -299,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 conversationHistory.removeChild(tempBubble);
             }
             console.error('Sophia Connection Error:', error);
-            addMessage(`Error: No he podido enlazar con el núcleo. Asegúrate de ejecutar el servidor con "npm start" y que Ollama tenga activo el modelo "llama3.2".`, 'sophia');
+            addMessage(`Error de comunicación (${error.message}). Asegúrate de abrir la página desde http://localhost:8080 (no con doble clic al archivo HTML) y de que el servidor esté activo con "npm start".`, 'sophia');
         }
     }
 

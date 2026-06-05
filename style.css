@@ -75,7 +75,7 @@ body::before {
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 20px;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 /* Header */
@@ -153,7 +153,6 @@ h1 {
     display: grid;
     grid-template-columns: 320px 1fr 360px;
     gap: 20px;
-    overflow: hidden;
 }
 
 /* Sidebar / Panels */

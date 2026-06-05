@@ -1,0 +1,3 @@
+# Sophia
+
+Proyecto Sophia.

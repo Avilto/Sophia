@@ -133,7 +133,7 @@ Por favor, integra esta información en tu respuesta de manera natural, citando 
         messagesForOllama.push({ role: 'user', content: message });
 
         console.log('[Ollama] Enviando petición a Ollama local...');
-        const ollamaResponse = await fetch('http://localhost:11434/api/chat', {
+        const ollamaResponse = await fetch('http://127.0.0.1:11434/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

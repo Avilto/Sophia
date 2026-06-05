@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sophia - Command Center</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo-area">
+                <div class="logo-node"></div>
+                <h1>SOPHIA v1.0</h1>
+            </div>
+            <div class="sys-status">
+                <div class="status-item">
+                    <span>RED:</span>
+                    <span class="status-indicator pulse"></span>
+                    <span style="color: #00ff66;">CONECTADO</span>
+                </div>
+                <div class="status-item">
+                    <span>NÚCLEO COGNITIVO:</span>
+                    <span style="color: var(--color-cyan);">ONLINE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Panel: IoT & Hardware Monitor -->
+            <section class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Sistemas IoT</span>
+                    <span style="color: var(--color-amber); font-size: 0.8rem;">DISPOSITIVOS: 4</span>
+                </div>
+                
+                <div class="iot-devices">
+                    <div class="device-card">
+                        <div class="device-info">
+                            <span class="device-name">Luces del Laboratorio</span>
+                            <span class="device-type">Iluminación Inteligente</span>
+                        </div>
+                        <div class="device-action">
+                            <label class="card-switch">
+                                <input type="checkbox" id="switch-lights">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="device-card">
+                        <div class="device-info">
+                            <span class="device-name">Acceso Principal</span>
+                            <span class="device-type">Cerradura Electrónica</span>
+                        </div>
+                        <div class="device-action">
+                            <label class="card-switch">
+                                <input type="checkbox" id="switch-door">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="device-card">
+                        <div class="device-info">
+                            <span class="device-name">Climatización</span>
+                            <span class="device-type">Termostato Central</span>
+                        </div>
+                        <div class="device-action">
+                            <label class="card-switch">
+                                <input type="checkbox" id="switch-acs">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="device-card">
+                        <div class="device-info">
+                            <span class="device-name">Escudo Cortafuegos</span>
+                            <span class="device-type">Seguridad Red</span>
+                        </div>
+                        <div class="device-action">
+                            <label class="card-switch">
+                                <input type="checkbox" id="switch-shield" checked>
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-header" style="margin-top: 15px;">
+                    <span class="panel-title">Monitoreo de Hardware</span>
+                </div>
+                <div class="hw-monitor">
+                    <div class="hw-row">
+                        <span>Frecuencia CPU</span>
+                        <span id="cpu-val" style="color: var(--color-cyan);">24%</span>
+                    </div>
+                    <div class="hw-bar-container">
+                        <div class="hw-bar" id="cpu-bar"></div>
+                    </div>
+
+                    <div class="hw-row" style="margin-top: 8px;">
+                        <span>Memoria RAM</span>
+                        <span id="ram-val" style="color: var(--color-cyan);">48%</span>
+                    </div>
+                    <div class="hw-bar-container">
+                        <div class="hw-bar" id="ram-bar"></div>
+                    </div>
+
+                    <div class="hw-row" style="margin-top: 8px;">
+                        <span>Temperatura CPU</span>
+                        <span id="temp-val" style="color: var(--color-magenta);">42°C</span>
+                    </div>
+                    <div class="hw-bar-container">
+                        <div class="hw-bar" id="temp-bar" style="background-color: var(--color-magenta);"></div>
+                    </div>
+                </div>
+
+                <div class="panel-header" style="margin-top: 15px;">
+                    <span class="panel-title">Estilo de Interfaz</span>
+                </div>
+                <select id="theme-selector" class="theme-selector">
+                    <option value="default">POR DEFECTO (NEÓN CIAN)</option>
+                    <option value="cyberpunk">PROTOCOLO MAGENTA</option>
+                    <option value="emerald">RED DE SEGURIDAD (VERDE)</option>
+                </select>
+            </section>
+
+            <!-- Center Column: Hologram Visualizer & AR Camera Feed -->
+            <section class="center-column">
+                
+                <!-- Sophia Hologram Visualizer -->
+                <div class="panel hologram-panel">
+                    <div class="panel-header" style="position: absolute; top: 15px; left: 20px; right: 20px;">
+                        <span class="panel-title">NÚCLEO HOLOGRÁFICO REACTIVO</span>
+                    </div>
+                    <div class="hologram-container">
+                        <canvas id="visualizer-canvas" class="visualizer-canvas"></canvas>
+                        <div class="hologram-orb"></div>
+                    </div>
+                    <div class="interaction-controls">
+                        <button id="voice-btn" class="voice-btn">Hablar con Sophia</button>
+                        <div id="voice-status" class="voice-status-text">Sophia está lista.</div>
+                    </div>
+                </div>
+
+                <!-- AR Vision Overlay -->
+                <div class="panel vision-panel">
+                    <div class="panel-header" style="position: absolute; top: 15px; left: 20px; z-index: 4;">
+                        <span class="panel-title" style="text-shadow: 0 0 5px black;">Visión Realidad Aumentada (AR)</span>
+                    </div>
+                    <div class="camera-container">
+                        <video id="webcam" autoplay playsinline></video>
+                        <canvas id="hud-canvas" class="hud-overlay-canvas"></canvas>
+                        <div class="scanline"></div>
+                        <div class="camera-fallback-msg">
+                            <p>[SISTEMA DE VISIÓN EN ESPERA]</p>
+                            <p>Di "Activar visión" o haz clic abajo</p>
+                        </div>
+                    </div>
+                    <div class="sim-vision-toggle">
+                        <button id="toggle-vision" class="hud-btn">ACTIVAR VISIÓN</button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Right Panel: Conversation Log -->
+            <section class="panel log-panel">
+                <div class="panel-header">
+                    <span class="panel-title">Bitácora de Interacciones</span>
+                    <span style="color: var(--color-cyan); font-size: 0.8rem;">EN LÍNEA</span>
+                </div>
+                
+                <div id="conversation-history" class="conversation-history">
+                    <!-- Dynamic Messages go here -->
+                </div>
+
+                <div class="chat-input-area">
+                    <input type="text" id="text-input" class="text-input" placeholder="Escribe un comando o pregunta..." autocomplete="off">
+                    <button id="send-btn" class="send-btn">ENVIAR</button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <span>SISTEMA DE ASISTENCIA SOPHIA • INTEGRACIÓN LOCAL MULTIMODAL</span>
+            <span>DISEÑO HOLOGRÁFICO HUD v1.0.0</span>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
